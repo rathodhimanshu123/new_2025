@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+        }
+        
+        .header h1 i {
+            color: #e74c3c;
+            margin-right: 10px;
+        }
+        
+        #map {
+            height: 450px;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .coordinates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .coordinate {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .coordinate span:first-child {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .coordinate span:last-child {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .status-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 8px 15px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .active {
+            background-color: #4caf50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+        }
+        
+        .inactive {
+            background-color: #f44336;
+            box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.3);
+        }
+        
+        .offline {
+            background-color: #9e9e9e;
+            box-shadow: 0 0 0 3px rgba(158, 158, 158, 0.3);
+        }
+        
+        .status-text {
+            flex: 1;
+        }
+        
+        .expiry-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+            background-color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border-left: 3px solid #ffc107;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn:hover {
+            background-color: #0069d9;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .error-container {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .error-container i {
+            font-size: 3rem;
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .error-message {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+        }
+        
+        .loading i {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            background-color: white;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .zoom-btn:hover {
+            background-color: #f5f5f5;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-map-marker-alt"></i> Live Location Viewer</h1>
+            <div class="actions">
+                <button id="refresh-btn" class="btn">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button id="directions-btn" class="btn btn-secondary">
+                    <i class="fas fa-directions"></i> Directions
+                </button>
+            </div>
+        </header>
+        
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Loading shared location...</p>
+        </div>
+        
+        <div id="content" style="display: none;">
+            <div class="status-bar">
+                <span id="status-indicator" class="status-indicator offline"></span>
+                <span id="status-text" class="status-text">Checking location status...</span>
+                <span id="expiry-info" class="expiry-info"></span>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-name" id="user-name">User's Location</div>
+                <div class="coordinates">
+                    <div class="coordinate">
+                        <span><i class="fas fa-arrows-alt-v"></i> Latitude</span>
+                        <span id="latitude">---.------</span>
+                    </div>
+                    <div class="coordinate">
+                        <span><i class="fas fa-arrows-alt-h"></i> Longitude</span>
+                        <span id="longitude">---.------</span>
+                    </div>
+                    <div class="coordinate">
+                        <span><i class="fas fa-tachometer-alt"></i> Accuracy</span>
+                        <span id="accuracy">-- m</span>
+                    </div>
+                    <div class="coordinate">
+                        <span><i class="fas fa-clock"></i> Last Updated</span>
+                        <span id="last-updated">--:--:--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="map-container" class="map-container">
+                <div id="map"></div>
+                <div id="zoom-controls" class="zoom-controls">
+                    <button id="zoom-in" class="zoom-btn"><i class="fas fa-plus"></i></button>
+                    <button id="zoom-out" class="zoom-btn"><i class="fas fa-minus"></i></button>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button id="share-btn" class="btn">
+                    <i class="fas fa-share-alt"></i> Share This View
+                </button>
+                <button id="track-btn" class="btn btn-secondary">
+                    <i class="fas fa-location-arrow"></i> Show My Location
+                </button>
+            </div>
+        </div>
+        
+        <div id="error-container" class="error-container" style="display: none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <h2 class="error-title">Location Unavailable</h2>
+            <p class="error-message" id="error-message">
+                The shared location is no longer available or has expired.
+            </p>
+            <button id="home-btn" class="btn">
+                <i class="fas fa-home"></i> Go to Home Page
+            </button>
+        </div>
+        
+        <footer>
+            <p>Powered by <a href="/">Live Location Tracker</a> | <a href="index.html">Track Your Own Location</a></p>
+        </footer>
+    </div>
+    
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    
+    <script>
+        // Global variables
+        let map;
+        let marker;
+        let accuracyCircle;
+        let shareId;
+        let lastFetchTime = 0;
+        let fetchInterval;
+        let locationData = null;
+        
+        // On page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parse query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            shareId = urlParams.get('id');
+            
+            if (!shareId) {
+                showError('No share ID provided. Please use a valid share link.');
+                return;
+            }
+            
+            // Initialize map
+            initializeMap();
+            
+            // Set up event listeners
+            document.getElementById('refresh-btn').addEventListener('click', refreshLocation);
+            document.getElementById('directions-btn').addEventListener('click', openDirections);
+            document.getElementById('share-btn').addEventListener('click', shareThisView);
+            document.getElementById('track-btn').addEventListener('click', showMyLocation);
+            document.getElementById('home-btn').addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+            
+            // Set up zoom controls
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                if (map) map.zoomIn();
+            });
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                if (map) map.zoomOut();
+            });
+            
+            // Fetch the shared location
+            fetchSharedLocation();
+            
+            // Set up refresh interval (every 10 seconds)
+            fetchInterval = setInterval(fetchSharedLocation, 10000);
+        });
+        
+        // Initialize Leaflet map
+        function initializeMap() {
+            map = L.map('map').setView([20.5937, 78.9629], 5); // Default to India
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Custom marker icon
+            const userIcon = L.divIcon({
+                className: 'user-location-marker',
+                html: '<div class="marker-dot"></div><div class="marker-pulse"></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+            
+            // Create marker but don't add to map yet
+            marker = L.marker([0, 0], { icon: userIcon });
+            
+            // Add styles for the marker
+            const style = document.createElement('style');
+            style.textContent = `
+                .user-location-marker {
+                    position: relative;
+                }
+                .marker-dot {
+                    width: 16px;
+                    height: 16px;
+                    background-color: #e74c3c;
+                    border: 3px solid white;
+                    border-radius: 50%;
+                    box-shadow: 0 0 6px rgba(0,0,0,0.4);
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+                .marker-pulse {
+                    width: 24px;
+                    height: 24px;
+                    background-color: rgba(231, 76, 60, 0.3);
+                    border-radius: 50%;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    animation: pulse 2s infinite;
+                }
+                @keyframes pulse {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0.5);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(2);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Fetch the shared location from the server
+        function fetchSharedLocation() {
+            // Show loading state on first load
+            if (!locationData) {
+                document.getElementById('loading').style.display = 'flex';
+                document.getElementById('content').style.display = 'none';
+                document.getElementById('error-container').style.display = 'none';
+            }
+            
+            // For demo, we'll use localStorage to store shares
+            // In a real app, this would call your server API
+            
+            const activeShares = JSON.parse(localStorage.getItem('activeShares') || '[]');
+            const share = activeShares.find(s => s.id === shareId);
+            
+            if (!share || !share.active) {
+                // Check if share expired
+                if (share) {
+                    const expiry = new Date(share.expires);
+                    if (expiry < new Date()) {
+                        showError('This shared location has expired.');
+                    } else {
+                        showError('This shared location is no longer active.');
+                    }
+                } else {
+                    showError('Invalid or unknown share link.');
+                }
+                
+                // Clear the fetch interval
+                if (fetchInterval) {
+                    clearInterval(fetchInterval);
+                }
+                return;
+            }
+            
+            // In a real app, you would call the API with the share ID
+            // For demo, we'll use the data directly from localStorage
+            locationData = {
+                latitude: share.latitude,
+                longitude: share.longitude,
+                accuracy: share.accuracy,
+                timestamp: share.timestamp,
+                userName: "User" // In a real app, you'd get the user's name
+            };
+            
+            // Update the UI with the location data
+            updateLocationDisplay(locationData);
+            
+            // Hide loading screen
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('error-container').style.display = 'none';
+            
+            // Update expiry info
+            updateExpiryInfo(share);
+        }
+        
+        // Update the UI with location data
+        function updateLocationDisplay(data) {
+            // Update coordinates display
+            document.getElementById('latitude').textContent = data.latitude.toFixed(6);
+            document.getElementById('longitude').textContent = data.longitude.toFixed(6);
+            document.getElementById('accuracy').textContent = Math.round(data.accuracy) + ' m';
+            document.getElementById('last-updated').textContent = new Date().toLocaleTimeString();
+            document.getElementById('user-name').textContent = data.userName + "'s Location";
+            
+            // Update status indicator
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
+            
+            // Check how recent the location is
+            const locationTime = new Date(data.timestamp);
+            const now = new Date();
+            const timeDiff = (now - locationTime) / 1000 / 60; // Minutes
+            
+            if (timeDiff < 1) {
+                // Less than 1 minute old - active
+                statusIndicator.className = 'status-indicator active';
+                statusText.textContent = 'Live - Currently Active';
+            } else if (timeDiff < 5) {
+                // Less than 5 minutes old - semi-active
+                statusIndicator.className = 'status-indicator active';
+                statusText.textContent = 'Active - Updated ' + Math.round(timeDiff) + ' min ago';
+            } else {
+                // More than 5 minutes old - inactive
+                statusIndicator.className = 'status-indicator inactive';
+                statusText.textContent = 'Inactive - Last seen ' + Math.round(timeDiff) + ' min ago';
+            }
+            
+            // Update map
+            updateMapWithLocation(data);
+        }
+        
+        // Update the map with location
+        function updateMapWithLocation(data) {
+            if (!map) return;
+            
+            const position = [data.latitude, data.longitude];
+            
+            // Update or add marker
+            if (!marker._map) {
+                marker.addTo(map);
+            }
+            marker.setLatLng(position);
+            
+            // Update or add accuracy circle
+            if (accuracyCircle) {
+                accuracyCircle.setLatLng(position);
+                accuracyCircle.setRadius(data.accuracy);
+            } else {
+                accuracyCircle = L.circle(position, {
+                    radius: data.accuracy,
+                    color: '#e74c3c',
+                    fillColor: '#e74c3c',
+                    fillOpacity: 0.15,
+                    weight: 2
+                }).addTo(map);
+            }
+            
+            // First time, center and zoom the map
+            if (!map._locationInitialized) {
+                map.setView(position, 16);
+                map._locationInitialized = true;
+            }
+        }
+        
+        // Update expiry info
+        function updateExpiryInfo(share) {
+            const expiryElement = document.getElementById('expiry-info');
+            if (!expiryElement) return;
+            
+            const expiry = new Date(share.expires);
+            const now = new Date();
+            const diffMs = expiry - now;
+            
+            if (diffMs <= 0) {
+                expiryElement.textContent = 'Expired';
+                return;
+            }
+            
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (diffHours > 0) {
+                expiryElement.textContent = `Expires in ${diffHours}h ${diffMinutes}m`;
+            } else {
+                expiryElement.textContent = `Expires in ${diffMinutes}m`;
+            }
+        }
+        
+        // Show error message
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error-container').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+        }
+        
+        // Manual refresh of location
+        function refreshLocation() {
+            fetchSharedLocation();
+        }
+        
+        // Open directions in Google Maps
+        function openDirections() {
+            if (!locationData) return;
+            
+            const { latitude, longitude } = locationData;
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+            window.open(mapsUrl, '_blank');
+        }
+        
+        // Share this view
+        function shareThisView() {
+            if (!locationData) return;
+            
+            const shareUrl = window.location.href;
+            const shareText = `Track a live location: ${shareUrl}`;
+            
+            // Check if Web Share API is available
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Live Location',
+                    text: shareText,
+                    url: shareUrl,
+                }).catch((error) => console.log('Error sharing', error));
+            } else {
+                // Fallback - copy to clipboard
+                copyToClipboard(shareUrl);
+                alert('Link copied to clipboard!');
+            }
+        }
+        
+        // Show my location on the map
+        function showMyLocation() {
+            if (!map) return;
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        
+                        // Create a temporary marker for user's position
+                        const myPosMarker = L.marker([latitude, longitude], {
+                            icon: L.icon({
+                                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map);
+                        
+                        myPosMarker.bindPopup('Your location').openPopup();
+                        
+                        // Adjust the map to show both markers
+                        const bounds = L.latLngBounds([
+                            [latitude, longitude],
+                            [locationData.latitude, locationData.longitude]
+                        ]);
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                    },
+                    (error) => {
+                        alert('Error getting your location: ' + error.message);
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser');
+            }
+        }
+        
+        // Copy to clipboard helper
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+        }
+    </script>
+</body>
+</html> 

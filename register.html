@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Live Location Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Google Maps inspired theme */
+        body {
+            font-family: 'Roboto', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(66, 133, 244, 0.6), rgba(219, 68, 55, 0.6)), url('https://maps.googleapis.com/maps/api/staticmap?center=22.5999,72.8217&zoom=13&size=1200x800&scale=2&style=feature:water|color:0x4285F4&style=feature:road|color:0xFFFFFF&style=feature:landscape|color:0xF1F3F4');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+        }
+
+        .auth-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .auth-card {
+            width: 400px;
+            max-width: 90%;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            transform: translateX(-200%);
+            animation: slide-in 0.6s forwards cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes slide-in {
+            0% { transform: translateX(-200%); }
+            100% { transform: translateX(0); }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+            animation: fade-in 0.8s forwards;
+            opacity: 0;
+            animation-delay: 0.3s;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-header img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 16px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .auth-header h2 {
+            margin: 0;
+            color: #202124;
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .auth-header p {
+            margin: 8px 0 0 0;
+            color: #5f6368;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fade-in 0.5s forwards;
+        }
+
+        /* Delay each form group animation */
+        .form-group:nth-child(1) { animation-delay: 0.4s; }
+        .form-group:nth-child(2) { animation-delay: 0.5s; }
+        .form-group:nth-child(3) { animation-delay: 0.6s; }
+        .form-group:nth-child(4) { animation-delay: 0.7s; }
+        .form-group:nth-child(5) { animation-delay: 0.8s; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #5f6368;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            background-color: white;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4285F4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+
+        .form-control.error {
+            border-color: #ea4335;
+        }
+
+        .error-message {
+            color: #ea4335;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #4285F4;
+            color: white;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fade-in 0.5s forwards;
+            animation-delay: 0.9s;
+        }
+
+        .btn-primary:hover {
+            background-color: #3b78e7;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+        }
+
+        .btn-primary:active {
+            background-color: #3367d6;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            opacity: 0;
+            animation: fade-in 0.5s forwards;
+            animation-delay: 1s;
+        }
+
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: #dadce0;
+        }
+
+        .divider-text {
+            padding: 0 16px;
+            color: #5f6368;
+            font-size: 14px;
+        }
+
+        .social-signin {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: fade-in 0.5s forwards;
+            animation-delay: 1.1s;
+        }
+
+        .social-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .social-btn:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+        }
+
+        .social-btn i {
+            margin-right: 8px;
+        }
+
+        .google-btn {
+            color: #ea4335;
+        }
+
+        .facebook-btn {
+            color: #1877f2;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+            color: #5f6368;
+            opacity: 0;
+            animation: fade-in 0.5s forwards;
+            animation-delay: 1.2s;
+        }
+
+        .auth-footer a {
+            color: #4285F4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Google loading animation */
+        .google-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            overflow: hidden;
+            display: none;
+            z-index: 10;
+        }
+
+        .google-loading::after {
+            content: "";
+            display: block;
+            width: 25%;
+            height: 100%;
+            background-color: #4285F4;
+            animation: google-loading 2s infinite;
+        }
+
+        @keyframes google-loading {
+            0% { transform: translateX(-100%); }
+            60% { transform: translateX(400%); }
+            100% { transform: translateX(400%); }
+        }
+
+        /* Map marker animations */
+        .map-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #EA4335;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            z-index: 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            animation: pulse-marker 2s infinite;
+        }
+        
+        .map-marker::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        @keyframes pulse-marker {
+            0% {
+                transform: rotate(-45deg) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: rotate(-45deg) scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: rotate(-45deg) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Toast notification styling */
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .notification {
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            padding: 12px 16px;
+            margin-top: 10px;
+            display: flex;
+            align-items: flex-start;
+            max-width: 300px;
+            animation: slide-in-notification 0.3s ease forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notification.success { border-left: 4px solid #34a853; }
+        .notification.error { border-left: 4px solid #ea4335; }
+        .notification.warning { border-left: 4px solid #fbbc04; }
+        .notification.info { border-left: 4px solid #4285f4; }
+
+        .notification-icon {
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 500;
+            margin: 0 0 4px 0;
+            color: #202124;
+        }
+
+        .notification-message {
+            margin: 0;
+            font-size: 13px;
+            color: #5f6368;
+        }
+
+        .notification-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background-color: rgba(0, 0, 0, 0.1);
+            animation: notification-progress 5s linear forwards;
+        }
+
+        @keyframes notification-progress {
+            0% { width: 100%; }
+            100% { width: 0%; }
+        }
+
+        @keyframes slide-in-notification {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slide-out-notification {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        /* Tooltip styling for map markers */
+        .maps-tooltip {
+            position: absolute;
+            background-color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .has-tooltip:hover .maps-tooltip {
+            opacity: 1;
+        }
+        
+        .pulse-animation {
+            animation: pulse 0.6s cubic-bezier(0.4, 0, 0.6, 1) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="google-loading"></div>
+            <div class="auth-header">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Live Location Tracker Logo">
+                <h2>Create an Account</h2>
+                <p>Sign up to start using Live Location Tracker</p>
+            </div>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" required>
+                    <div class="error-message" id="nameError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                    <div class="error-message" id="confirmPasswordError"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+            <div class="divider">
+                <span class="divider-text">OR</span>
+            </div>
+            <div class="social-signin">
+                <button class="social-btn google-btn" id="googleSignUpBtn">
+                    <i class="fab fa-google"></i> Continue with Google
+                </button>
+                <button class="social-btn facebook-btn" id="facebookSignUpBtn">
+                    <i class="fab fa-facebook-f"></i> Continue with Facebook
+                </button>
+            </div>
+            <div class="auth-footer">
+                Already have an account? <a href="login.html">Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <script>
+        // Create animated map markers in the background
+        function createMapMarkers() {
+            const authContainer = document.querySelector('.auth-container');
+            const numMarkers = 5;
+            
+            for (let i = 0; i < numMarkers; i++) {
+                // Create a marker
+                const marker = document.createElement('div');
+                marker.className = 'map-marker';
+                
+                // Random position
+                const top = Math.random() * 80 + 10; // Keep somewhat in the visible area
+                const left = Math.random() * 80 + 10;
+                
+                // Set styles
+                marker.style.top = `${top}%`;
+                marker.style.left = `${left}%`;
+                marker.style.animationDelay = `${Math.random() * 2}s`;
+                
+                // Add tooltip with mock location
+                const tooltip = document.createElement('div');
+                tooltip.className = 'maps-tooltip';
+                tooltip.textContent = getRandomLocation();
+                marker.appendChild(tooltip);
+                marker.classList.add('has-tooltip');
+                
+                // Add to container
+                authContainer.appendChild(marker);
+                
+                // Add click behavior
+                marker.addEventListener('click', function() {
+                    this.style.backgroundColor = getRandomColor();
+                    this.classList.add('pulse-animation');
+                    setTimeout(() => {
+                        this.classList.remove('pulse-animation');
+                    }, 1000);
+                });
+            }
+        }
+        
+        // Helper function for random location names
+        function getRandomLocation() {
+            const locations = [
+                'Ahmedabad', 'Mumbai', 'Delhi', 'Bangalore', 
+                'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 
+                'Jaipur', 'Surat', 'Vadodara', 'Rajkot'
+            ];
+            return locations[Math.floor(Math.random() * locations.length)];
+        }
+        
+        // Helper function for random colors
+        function getRandomColor() {
+            const colors = ['#4285F4', '#DB4437', '#F4B400', '#0F9D58'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        // Add notification functionality
+        function showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            let iconClass = 'info-circle';
+            if (type === 'success') iconClass = 'check-circle';
+            if (type === 'error') iconClass = 'exclamation-circle';
+            if (type === 'warning') iconClass = 'exclamation-triangle';
+            
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    <i class="fas fa-${iconClass}"></i>
+                </div>
+                <div class="notification-content">
+                    <h4 class="notification-title">${title}</h4>
+                    <p class="notification-message">${message}</p>
+                </div>
+                <div class="notification-progress"></div>
+            `;
+            
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slide-out-notification 0.3s ease forwards';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 5000);
+        }
+
+        // Initialize animations and interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            createMapMarkers();
+            
+            // Form validation with Google Maps inspired feedback
+            const registerForm = document.getElementById('registerForm');
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading indicator
+                document.querySelector('.google-loading').style.display = 'block';
+                
+                // Get form values
+                const name = document.getElementById('name').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                // Simple validation
+                let isValid = true;
+                
+                if (name.length < 3) {
+                    document.getElementById('nameError').textContent = 'Name should be at least 3 characters';
+                    document.getElementById('nameError').style.display = 'block';
+                    document.getElementById('name').classList.add('error');
+                    isValid = false;
+                } else {
+                    document.getElementById('nameError').style.display = 'none';
+                    document.getElementById('name').classList.remove('error');
+                }
+                
+                if (!email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)) {
+                    document.getElementById('emailError').textContent = 'Please enter a valid email address';
+                    document.getElementById('emailError').style.display = 'block';
+                    document.getElementById('email').classList.add('error');
+                    isValid = false;
+                } else {
+                    document.getElementById('emailError').style.display = 'none';
+                    document.getElementById('email').classList.remove('error');
+                }
+                
+                if (password.length < 6) {
+                    document.getElementById('passwordError').textContent = 'Password should be at least 6 characters';
+                    document.getElementById('passwordError').style.display = 'block';
+                    document.getElementById('password').classList.add('error');
+                    isValid = false;
+                } else {
+                    document.getElementById('passwordError').style.display = 'none';
+                    document.getElementById('password').classList.remove('error');
+                }
+                
+                if (password !== confirmPassword) {
+                    document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+                    document.getElementById('confirmPasswordError').style.display = 'block';
+                    document.getElementById('confirmPassword').classList.add('error');
+                    isValid = false;
+                } else {
+                    document.getElementById('confirmPasswordError').style.display = 'none';
+                    document.getElementById('confirmPassword').classList.remove('error');
+                }
+                
+                // If valid, simulate registration
+                if (isValid) {
+                    // Simulate API call delay
+                    setTimeout(() => {
+                        // Create a mock user and token
+                        const mockUser = {
+                            id: Math.random().toString(36).substring(2),
+                            name: name,
+                            email: email
+                        };
+                        
+                        const mockToken = 'mock_token_' + Math.random().toString(36).substring(2);
+                        
+                        // Store in localStorage
+                        localStorage.setItem('user', JSON.stringify(mockUser));
+                        localStorage.setItem('token', mockToken);
+                        
+                        // Hide loading
+                        document.querySelector('.google-loading').style.display = 'none';
+                        
+                        // Add Google Maps style transition effect
+                        const authCard = document.querySelector('.auth-card');
+                        authCard.style.transition = 'all 0.5s ease';
+                        authCard.style.transform = 'scale(0.95)';
+                        authCard.style.opacity = '0';
+                        
+                        showNotification('Registration Successful', 'Your account has been created!', 'success');
+                        
+                        // Redirect to index page
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+                    }, 1500);
+                } else {
+                    // Hide loading if validation failed
+                    document.querySelector('.google-loading').style.display = 'none';
+                    showNotification('Registration Failed', 'Please correct the errors in the form', 'error');
+                }
+            });
+            
+            // Enhance social sign in buttons
+            document.getElementById('googleSignUpBtn').addEventListener('click', function() {
+                handleSocialSignup('google');
+            });
+            
+            document.getElementById('facebookSignUpBtn').addEventListener('click', function() {
+                handleSocialSignup('facebook');
+            });
+            
+            // Apply input focus effects
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('input-focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('input-focused');
+                });
+            });
+        });
+        
+        // Handle social signup process
+        function handleSocialSignup(provider) {
+            // Show loading state on button
+            const btn = provider === 'google' ? 
+                document.getElementById('googleSignUpBtn') : 
+                document.getElementById('facebookSignUpBtn');
+                
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Connecting...`;
+            
+            // Add Google Maps style loading bar
+            document.querySelector('.google-loading').style.display = 'block';
+            
+            // Simulate OAuth process
+            setTimeout(() => {
+                // For development/demo purposes, we'll simulate a successful signup
+                showNotification('Social Signup', `Signing up with ${provider} (simulated)`, 'info');
+                
+                // Simulate API call delay
+                setTimeout(() => {
+                    // Create a mock user and token
+                    const mockUser = {
+                        id: 'social_' + Math.random().toString(36).substring(2),
+                        name: provider === 'google' ? 'Google User' : 'Facebook User',
+                        email: `${provider}user@example.com`,
+                        provider: provider
+                    };
+                    
+                    const mockToken = 'mock_token_' + Math.random().toString(36).substring(2);
+                    
+                    // Store in localStorage
+                    localStorage.setItem('user', JSON.stringify(mockUser));
+                    localStorage.setItem('token', mockToken);
+                    
+                    // Hide the loading bar
+                    document.querySelector('.google-loading').style.display = 'none';
+                    
+                    // Show success notification
+                    showNotification('Registration Successful', `Welcome, ${mockUser.name}!`, 'success');
+                    
+                    // Add Google Maps style transition effect
+                    const authCard = document.querySelector('.auth-card');
+                    authCard.style.transition = 'all 0.5s ease';
+                    authCard.style.transform = 'scale(0.95)';
+                    authCard.style.opacity = '0';
+                    
+                    // Redirect to index page
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 800);
+                }, 1500);
+            }, 800);
+        }
+    </script>
+</body>
+</html> 

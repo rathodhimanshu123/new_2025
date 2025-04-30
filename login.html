@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Live Location Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #3f51b5 0%, #1a237e 100%);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            background-image: url('https://maps.googleapis.com/maps/api/staticmap?center=23.0225,72.5714&zoom=11&size=1920x1080&scale=2&maptype=roadmap&style=element:geometry%7Ccolor:0xf5f5f5&style=element:labels.icon%7Cvisibility:off&style=element:labels.text.fill%7Ccolor:0x616161&style=element:labels.text.stroke%7Ccolor:0xf5f5f5&style=feature:administrative.land_parcel%7Celement:labels.text.fill%7Ccolor:0xbdbdbd&style=feature:poi%7Celement:geometry%7Ccolor:0xeeeeee&style=feature:poi%7Celement:labels.text.fill%7Ccolor:0x757575&style=feature:poi.park%7Celement:geometry%7Ccolor:0xe5e5e5&style=feature:poi.park%7Celement:labels.text.fill%7Ccolor:0x9e9e9e&style=feature:road%7Celement:geometry%7Ccolor:0xffffff&style=feature:road.arterial%7Celement:labels.text.fill%7Ccolor:0x757575&style=feature:road.highway%7Celement:geometry%7Ccolor:0xdadada&style=feature:road.highway%7Celement:labels.text.fill%7Ccolor:0x616161&style=feature:road.local%7Celement:labels.text.fill%7Ccolor:0x9e9e9e&style=feature:transit.line%7Celement:geometry%7Ccolor:0xe5e5e5&style=feature:transit.station%7Celement:geometry%7Ccolor:0xeeeeee&style=feature:water%7Celement:geometry%7Ccolor:0xc9c9c9&style=feature:water%7Celement:labels.text.fill%7Ccolor:0x9e9e9e&key=');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(33, 33, 33, 0.7);
+            z-index: 1;
+        }
+        
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            padding: 40px;
+            transition: all 0.3s ease;
+            z-index: 2;
+            position: relative;
+            animation: slide-in-card 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            opacity: 0;
+            transform: translateX(-100px);
+        }
+        
+        @keyframes slide-in-card {
+            0% {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fade-in 0.5s ease forwards;
+            animation-delay: 0.6s;
+            opacity: 0;
+        }
+        
+        @keyframes fade-in {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .auth-header img {
+            height: 60px;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+            animation-delay: 1.2s;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .auth-header h2 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #3f51b5, #1a237e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .auth-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .social-login {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+            animation: fade-in 0.5s ease forwards;
+            animation-delay: 0.8s;
+            opacity: 0;
+        }
+        
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .social-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s;
+        }
+        
+        .social-btn:hover::before {
+            left: 100%;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .google-btn {
+            color: #444;
+            border: 1px solid #ddd;
+        }
+        
+        .facebook-btn {
+            background: #1877F2;
+            color: white;
+            border: none;
+        }
+        
+        .social-btn i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: #777;
+            font-size: 14px;
+            animation: fade-in 0.5s ease forwards;
+            animation-delay: 1s;
+            opacity: 0;
+        }
+        
+        .divider::before, 
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #ddd;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            animation: fade-in 0.5s ease forwards;
+            animation-delay: 1.2s;
+            opacity: 0;
+        }
+        
+        #login-form .form-group:nth-child(2) {
+            animation-delay: 1.4s;
+        }
+        
+        #login-form .remember-forgot {
+            animation: fade-in 0.5s ease forwards;
+            animation-delay: 1.6s;
+            opacity: 0;
+        }
+        
+        #login-form button[type="submit"] {
+            animation: fade-in 0.5s ease forwards;
+            animation-delay: 1.8s;
+            opacity: 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #f9f9f9;
+        }
+        
+        .form-group input:focus {
+            border-color: #4285F4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+            outline: none;
+            background-color: #fff;
+        }
+        
+        .password-field {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #777;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+        
+        .toggle-password i {
+            font-size: 14px;
+        }
+        
+        .toggle-password:hover {
+            color: #4285F4;
+        }
+        
+        .toggle-password-text {
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .password-visibility-status {
+            position: absolute;
+            right: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #777;
+            user-select: none;
+        }
+        
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+        
+        .remember-me input {
+            margin-right: 8px;
+            accent-color: #4285F4;
+        }
+        
+        .forgot-password {
+            color: #4285F4;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .forgot-password:hover {
+            text-decoration: underline;
+            color: #1a73e8;
+        }
+        
+        .btn-primary {
+            background: #4285F4;
+            color: white;
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            background: #1a73e8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.3);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #666;
+            animation: fade-in 0.5s ease forwards;
+            animation-delay: 2s;
+            opacity: 0;
+        }
+        
+        .form-footer a {
+            color: #4285F4;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+            color: #1a73e8;
+        }
+        
+        /* OTP Form Styles */
+        .otp-input-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .otp-input {
+            width: 55px;
+            height: 60px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .otp-input:focus {
+            border-color: #3f51b5;
+            box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+            outline: none;
+        }
+        
+        .otp-countdown {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        
+        #countdown-timer {
+            font-weight: 600;
+            color: #3f51b5;
+        }
+        
+        .resend-otp-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        /* Error/Success Messages */
+        .message-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .message-box i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .error {
+            background-color: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #f44336;
+        }
+        
+        .success {
+            background-color: rgba(63, 81, 181, 0.1);
+            border: 1px solid rgba(63, 81, 181, 0.3);
+            color: #3f51b5;
+        }
+        
+        /* Form Transitions */
+        .form-container {
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .form-slide {
+            transition: transform 0.3s ease;
+        }
+        
+        /* Loading Button */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+        }
+        
+        .btn-loading:after {
+            content: "";
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+        }
+        
+        @keyframes spin {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+        
+        /* Media Queries */
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 30px 20px;
+            }
+            
+            .auth-header h2 {
+                font-size: 24px;
+            }
+            
+            .otp-input {
+                width: 45px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .dev-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background-color: #2196F3;
+            color: white;
+            padding: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 9999;
+            overflow: hidden;
+            animation: slide-in 0.3s ease-out;
+        }
+        
+        .dev-notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: rgba(0,0,0,0.1);
+        }
+        
+        .dev-notification-body {
+            padding: 15px;
+            white-space: pre-line;
+        }
+        
+        .dev-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Notification System Styles */
+        #notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+        
+        .notification {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            animation: notification-slide-in 0.3s forwards;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .notification-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-left: 10px;
+            flex-grow: 1;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        
+        .notification-close:hover {
+            color: #333;
+        }
+        
+        .notification-body {
+            padding: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .success-notification {
+            border-left-color: #4CAF50;
+        }
+        
+        .error-notification {
+            border-left-color: #F44336;
+        }
+        
+        .warning-notification {
+            border-left-color: #FF9800;
+        }
+        
+        .info-notification {
+            border-left-color: #2196F3;
+        }
+        
+        .notification-hide {
+            animation: notification-slide-out 0.3s forwards;
+        }
+        
+        @keyframes notification-slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes notification-slide-out {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        /* Google Maps inspired elements */
+        .map-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #EA4335;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            z-index: 0;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            animation: pulse-marker 2s infinite;
+        }
+        
+        .map-marker::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        @keyframes pulse-marker {
+            0% {
+                transform: rotate(-45deg) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: rotate(-45deg) scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: rotate(-45deg) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .pulse-animation {
+            animation: pulse 0.6s cubic-bezier(0.4, 0, 0.6, 1) !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .input-focused {
+            position: relative;
+        }
+        
+        .input-focused::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #4285F4;
+            animation: input-focus 0.3s forwards;
+            transform-origin: center;
+            transform: scaleX(0);
+        }
+        
+        @keyframes input-focus {
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
+        }
+        
+        /* Google Maps inspired theme buttons */
+        .google-maps-btn {
+            padding: 10px 16px;
+            background-color: white;
+            color: #1a73e8;
+            border-radius: 4px;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        .google-maps-btn:hover {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+        }
+        
+        /* Loading animation similar to Google Maps */
+        .google-loading {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            overflow: hidden;
+            background-color: #E8EAED;
+            top: 0;
+            left: 0;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .google-loading::after {
+            content: "";
+            display: block;
+            width: 30%;
+            height: 100%;
+            background-color: #4285F4;
+            animation: google-loading 2s infinite;
+        }
+        
+        @keyframes google-loading {
+            0% { transform: translateX(-100%); }
+            60% { transform: translateX(400%); }
+            100% { transform: translateX(400%); }
+        }
+        
+        /* Tooltip styling */
+        .maps-tooltip {
+            position: absolute;
+            background-color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .has-tooltip:hover .maps-tooltip {
+            opacity: 1;
+        }
+        
+        /* Additional animated background elements for login page */
+        .animated-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+        
+        .animated-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            background: linear-gradient(135deg, #4285F4, #0F9D58);
+            animation: circle-float 15s infinite ease-in-out;
+        }
+        
+        .circle-1 {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            left: -150px;
+            animation-delay: 0s;
+        }
+        
+        .circle-2 {
+            width: 400px;
+            height: 400px;
+            bottom: -200px;
+            right: -200px;
+            background: linear-gradient(135deg, #DB4437, #F4B400);
+            animation-delay: 5s;
+        }
+        
+        .circle-3 {
+            width: 200px;
+            height: 200px;
+            top: 40%;
+            left: 10%;
+            background: linear-gradient(135deg, #0F9D58, #4285F4);
+            animation-delay: 2s;
+        }
+        
+        .circle-4 {
+            width: 250px;
+            height: 250px;
+            top: 30%;
+            right: 5%;
+            background: linear-gradient(135deg, #F4B400, #DB4437);
+            animation-delay: 7s;
+        }
+        
+        @keyframes circle-float {
+            0% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(30px) scale(1.1); }
+            100% { transform: translateY(0) scale(1); }
+        }
+        
+        /* Animated Login Button */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: button-shine 3s infinite;
+        }
+        
+        @keyframes button-shine {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+        
+        /* Input field focus animation */
+        .form-group input:focus {
+            animation: input-pulse 1s ease;
+        }
+        
+        @keyframes input-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(66, 133, 244, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(66, 133, 244, 0); }
+        }
+        
+        /* Floating icons animation for social buttons */
+        .social-btn i {
+            transition: transform 0.3s ease;
+        }
+        
+        .social-btn:hover i {
+            animation: icon-bounce 0.5s ease infinite alternate;
+        }
+        
+        @keyframes icon-bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-3px); }
+        }
+        
+        /* Typing cursor animation for input fields */
+        .form-group input::after {
+            content: '|';
+            display: inline-block;
+            animation: cursor-blink 1s infinite;
+        }
+        
+        @keyframes cursor-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        /* Enhanced loading animation */
+        .google-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            overflow: hidden;
+            background-color: #f5f5f5;
+            z-index: 1000;
+        }
+        
+        .google-loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 30%;
+            height: 100%;
+            background-color: #4285F4;
+            animation: google-loading 2s infinite ease-in-out;
+        }
+        
+        @keyframes google-loading {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(200%); }
+            100% { transform: translateX(500%); }
+        }
+        
+        /* Card hover effect */
+        .auth-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        /* Input highlight animation */
+        @keyframes input-highlight {
+            0% { border-color: #ddd; }
+            50% { border-color: #4285F4; }
+            100% { border-color: #ddd; }
+        }
+        
+        .form-control-animated {
+            animation: input-highlight 2s infinite;
+        }
+        
+        /* Ripple effect for buttons */
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.4);
+            width: 100px;
+            height: 100px;
+            margin-top: -50px;
+            margin-left: -50px;
+            animation: ripple 0.8s ease-out;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+        
+        /* Button styles enhancement */
+        .btn, .social-btn {
+            position: relative;
+            overflow: hidden; /* For ripple effect */
+        }
+        
+        /* Message box styles */
+        #message-box {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            animation: fade-in 0.3s forwards;
+        }
+        
+        #message-box.hidden {
+            display: none;
+        }
+        
+        #message-box.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4CAF50;
+            color: #2E7D32;
+        }
+        
+        #message-box.error {
+            background-color: rgba(244, 67, 54, 0.1);
+            border-left: 4px solid #F44336;
+            color: #C62828;
+        }
+        
+        #message-box:before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        #message-box.success:before {
+            content: "\f058"; /* Check circle icon */
+            color: #4CAF50;
+        }
+        
+        #message-box.error:before {
+            content: "\f057"; /* Times circle icon */
+            color: #F44336;
+        }
+        
+        .btn-loading:after {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Typed input animation */
+        .typed {
+            border-left: 2px solid #4285F4;
+            animation: cursor-flash 1s infinite;
+        }
+        
+        @keyframes cursor-flash {
+            0%, 100% { border-color: transparent; }
+            50% { border-color: #4285F4; }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="animated-background">
+            <div class="animated-circle circle-1"></div>
+            <div class="animated-circle circle-2"></div>
+            <div class="animated-circle circle-3"></div>
+            <div class="animated-circle circle-4"></div>
+        </div>
+        <div class="auth-card">
+            <div class="google-loading"></div>
+            <div class="auth-header">
+                <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" alt="Live Location Tracker Logo">
+                <h2>Welcome Back</h2>
+                <p>Sign in to continue to Live Location Tracker</p>
+            </div>
+            
+            <div id="message-box" class="hidden">
+                <span id="message-text"></span>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-form-container" class="form-container">
+                <div class="social-login">
+                    <button class="social-btn google-btn">
+                        <i class="fab fa-google"></i>
+                        Continue with Google
+                    </button>
+                    <button class="social-btn facebook-btn">
+                        <i class="fab fa-facebook-f"></i>
+                        Continue with Facebook
+                    </button>
+                </div>
+                
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+                
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-field">
+                            <input type="text" id="password" name="password" required placeholder="Enter your password">
+                            <button type="button" class="toggle-password" aria-label="Toggle password visibility" title="Hide password" onclick="togglePasswordVisibility(this)">
+                                <i class="fa-regular fa-eye-slash"></i>
+                                <span class="toggle-password-text">Hide Password</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="remember-forgot">
+                        <label class="remember-me">
+                            <input type="checkbox" id="remember" name="remember"> 
+                            Remember me
+                        </label>
+                        <a href="#" class="forgot-password" id="show-forgot-form">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Sign In</button>
+                </form>
+                
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="register.html">Sign Up</a></p>
+                </div>
+            </div>
+            
+            <!-- Forgot Password Form -->
+            <div id="forgot-form-container" class="form-container hidden">
+                <form id="forgot-form">
+                    <div class="form-group">
+                        <label for="forgot-phone">Email or Phone Number</label>
+                        <input type="text" id="forgot-phone" name="forgot-phone" required placeholder="Enter your email or phone number">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Send Verification Code</button>
+                    
+                    <div class="form-footer">
+                        <a href="#" id="back-to-login">Back to Login</a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Password Reset Form -->
+            <div id="reset-password-container" class="form-container hidden">
+                <h3 style="margin-bottom: 15px; text-align: center;">Reset Your Password</h3>
+                <p style="margin-bottom: 25px; text-align: center; color: #666;">Enter verification code and new password</p>
+                
+                <form id="reset-password-form">
+                    <div class="form-group">
+                        <label for="reset-phone">Phone Number</label>
+                        <input type="tel" id="reset-phone" name="reset-phone" required placeholder="Enter the phone number" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reset-otp">Verification Code</label>
+                        <input type="text" id="reset-otp" name="reset-otp" required placeholder="Enter 6-digit code" maxlength="6" pattern="[0-9]{6}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reset-password">New Password</label>
+                        <div class="password-field">
+                            <input type="text" id="reset-password" name="reset-password" required placeholder="Create new password">
+                            <button type="button" class="toggle-password" aria-label="Toggle password visibility" title="Hide password" onclick="togglePasswordVisibility(this)">
+                                <i class="fa-regular fa-eye-slash"></i>
+                                <span class="toggle-password-text">Hide Password</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reset-confirm-password">Confirm Password</label>
+                        <div class="password-field">
+                            <input type="text" id="reset-confirm-password" name="reset-confirm-password" required placeholder="Confirm new password">
+                            <button type="button" class="toggle-password" aria-label="Toggle password visibility" title="Hide password" onclick="togglePasswordVisibility(this)">
+                                <i class="fa-regular fa-eye-slash"></i>
+                                <span class="toggle-password-text">Hide Password</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Reset Password</button>
+                    
+                    <div class="form-footer">
+                        <a href="#" id="back-to-forgot">Back</a> | 
+                        <a href="#" id="resend-reset-otp" class="disabled">Resend Code</a>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- OTP Verification Form -->
+            <div id="otp-form-container" class="form-container hidden">
+                <h3 style="margin-bottom: 15px; text-align: center;">Verification Code</h3>
+                <p style="margin-bottom: 25px; text-align: center; color: #666;">We've sent a code to your email/phone</p>
+                
+                <form id="otp-form">
+                    <div class="otp-input-container">
+                        <input type="text" class="otp-input" maxlength="1" data-index="1" autofocus>
+                        <input type="text" class="otp-input" maxlength="1" data-index="2">
+                        <input type="text" class="otp-input" maxlength="1" data-index="3">
+                        <input type="text" class="otp-input" maxlength="1" data-index="4">
+                    </div>
+                    
+                    <div class="otp-countdown">
+                        <p>Code expires in: <span id="countdown-timer">02:00</span></p>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Verify</button>
+                    
+                    <div class="resend-otp-container">
+                        <p>Didn't receive the code? <a href="#" id="resend-otp" class="disabled">Resend</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification-container"></div>
+
+    <script>
+        // Function to toggle password visibility
+        function togglePasswordVisibility(button) {
+            const passwordField = button.closest('.password-field');
+            if (!passwordField) return;
+            
+            const passwordInput = passwordField.querySelector('input');
+            if (!passwordInput) return;
+            
+            if (passwordInput.type === 'text') {
+                // Hide password
+                passwordInput.type = 'password';
+                button.innerHTML = '<i class="fa-regular fa-eye"></i><span class="toggle-password-text">Show Password</span>';
+                button.title = 'Show password';
+            } else {
+                // Show password
+                passwordInput.type = 'text';
+                button.innerHTML = '<i class="fa-regular fa-eye-slash"></i><span class="toggle-password-text">Hide Password</span>';
+                button.title = 'Hide password';
+            }
+        }
+        
+        // API base URL
+        let API_BASE_URL = 'https://api.livelocationtracking.com';
+        
+        // For development, use local API if available
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // Check if local API is running on port 3000
+            fetch('http://localhost:3000/api/health', { method: 'GET' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Local API server detected');
+                        API_BASE_URL = 'http://localhost:3000';
+                    }
+                })
+                .catch(error => {
+                    console.log('No local API server detected, using production API');
+                });
+        }
+
+        // When the page is loaded, check if the user is already logged in
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Login page loaded");
+            
+            // Elements
+            const loginForm = document.getElementById('login-form');
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            
+            // Check if elements exist
+            if (!loginForm || !messageBox || !messageText) {
+                console.error("Required elements not found on page");
+                return;
+            }
+            
+            // Immediately check for existing token
+            const token = localStorage.getItem('token');
+            if (token) {
+                console.log("Found existing token, validating...");
+                validateToken(token);
+            }
+            
+            // Initialize login form elements
+            initializeFormElements();
+            
+            // Setup Forgot Password functionality
+            setupForgotPassword();
+            
+            // Setup login form submission
+            setupLoginForm();
+            
+            // Setup social login buttons
+            setupSocialLogin();
+            
+            // Setup password toggle functionality
+            setupPasswordToggles();
+        });
+
+        function initializeFormElements() {
+            // Initialize form elements if needed
+            const rememberCheckbox = document.getElementById('remember');
+            if (rememberCheckbox && localStorage.getItem('remember') === 'true') {
+                rememberCheckbox.checked = true;
+            }
+            
+            // Add any other initialization logic here
+        }
+        
+        // Function to setup forgot password functionality
+        function setupForgotPassword() {
+            // Setup the show forgot form link
+            const showForgotFormLink = document.getElementById('show-forgot-form');
+            if (showForgotFormLink) {
+                showForgotFormLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                    console.log("Show forgot password form clicked");
+                    showForgotPasswordForm();
+            });
+            }
+            
+            // Setup the back to login link
+            const backToLoginLink = document.getElementById('back-to-login');
+            if (backToLoginLink) {
+                backToLoginLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                    console.log("Back to login clicked");
+                    showLoginForm();
+                });
+            }
+            
+            // Setup the back to forgot password link
+            const backToForgotLink = document.getElementById('back-to-forgot');
+            if (backToForgotLink) {
+                backToForgotLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                    console.log("Back to forgot password clicked");
+                    showForgotPasswordForm();
+                });
+            }
+            
+            // Setup resend OTP link
+            const resendResetOtpLink = document.getElementById('resend-reset-otp');
+            if (resendResetOtpLink) {
+                resendResetOtpLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (!resendResetOtpLink.classList.contains('disabled')) {
+                        console.log("Resend OTP clicked");
+                        resendOTP();
+                    }
+                });
+            }
+            
+            // Setup the forgot password form submission
+            const forgotForm = document.getElementById('forgot-form');
+            if (forgotForm) {
+                forgotForm.addEventListener('submit', handleForgotPassword);
+            }
+            
+            // Setup password toggle functionality
+            setupPasswordToggles();
+        }
+        
+        // Function to setup password toggle
+        function setupPasswordToggles() {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const passwordField = this.closest('.password-field');
+                    if (!passwordField) return;
+                    
+                    const passwordInput = passwordField.querySelector('input');
+                    
+                    if (!passwordInput) return;
+                    
+                    // Toggle password visibility
+                    if (passwordInput.type === 'text') {
+                        passwordInput.type = 'password';
+                        this.innerHTML = '<i class="fa-regular fa-eye"></i><span class="toggle-password-text">Show Password</span>';
+                        this.title = 'Show password';
+                    } else {
+                        passwordInput.type = 'text';
+                        this.innerHTML = '<i class="fa-regular fa-eye-slash"></i><span class="toggle-password-text">Hide Password</span>';
+                        this.title = 'Hide password';
+                    }
+                });
+            });
+            
+            console.log('Password toggle functionality set up');
+        }
+        
+        // Function to show the forgot password form
+        function showForgotPasswordForm() {
+            // Hide login form
+            const loginFormContainer = document.getElementById('login-form-container');
+            if (loginFormContainer) {
+                loginFormContainer.classList.add('hidden');
+            }
+            
+            // Show forgot password form
+            const forgotFormContainer = document.getElementById('forgot-form-container');
+            if (forgotFormContainer) {
+                forgotFormContainer.classList.remove('hidden');
+            }
+            
+            // Focus on recovery email input
+                setTimeout(() => {
+                const recoveryInput = document.getElementById('forgot-phone');
+                if (recoveryInput) {
+                    recoveryInput.focus();
+                }
+            }, 100);
+        }
+        
+        // Function to show the login form
+        function showLoginForm() {
+            // Show login form
+            const loginFormContainer = document.getElementById('login-form-container');
+            if (loginFormContainer) {
+                loginFormContainer.classList.remove('hidden');
+            }
+            
+            // Hide forgot password form
+            const forgotFormContainer = document.getElementById('forgot-form-container');
+            if (forgotFormContainer) {
+                forgotFormContainer.classList.add('hidden');
+            }
+            
+            // Hide reset password form if visible
+            const resetPasswordContainer = document.getElementById('reset-password-container');
+            if (resetPasswordContainer) {
+                resetPasswordContainer.classList.add('hidden');
+            }
+        }
+        
+        // Function to generate secure OTP
+        function generateSecureOTP() {
+            const length = 6;
+            const charset = '0123456789';
+            let otp = '';
+            
+            // Use secure random values if available
+            if (window.crypto && window.crypto.getRandomValues) {
+                const values = new Uint32Array(length);
+                window.crypto.getRandomValues(values);
+                for (let i = 0; i < length; i++) {
+                    otp += charset[values[i] % charset.length];
+                }
+                    } else {
+                // Fallback (less secure)
+                for (let i = 0; i < length; i++) {
+                    otp += charset.charAt(Math.floor(Math.random() * charset.length));
+                }
+            }
+            
+            return otp;
+        }
+        
+        // Set OTP with expiration
+        function setOTPWithExpiration(otp) {
+            const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+            const otpData = {
+                code: otp,
+                expiresAt: expirationTime
+            };
+            sessionStorage.setItem('dev_otp', JSON.stringify(otpData));
+        }
+        
+        // Validate OTP with expiration check
+        function validateOTP(inputOTP) {
+            const otpDataString = sessionStorage.getItem('dev_otp');
+            if (!otpDataString) {
+                return { valid: false, message: "Verification code not found or expired. Please request a new one." };
+            }
+            
+            try {
+                const otpData = JSON.parse(otpDataString);
+                
+                // Check if OTP has expired
+                if (Date.now() > otpData.expiresAt) {
+                    sessionStorage.removeItem('dev_otp');
+                    return { valid: false, message: "Verification code has expired. Please request a new one." };
+                }
+                
+                // Check if OTP matches
+                if (inputOTP !== otpData.code) {
+                    return { valid: false, message: "Invalid verification code. Please try again." };
+                }
+                
+                return { valid: true };
+            } catch (error) {
+                console.error("Error validating OTP:", error);
+                return { valid: false, message: "An error occurred. Please try again." };
+            }
+        }
+
+        // Function to handle forgot password form submission
+        async function handleForgotPassword(e) {
+                e.preventDefault();
+            console.log("Forgot password form submitted");
+            
+            // Get form inputs
+            const contactInput = document.getElementById('forgot-phone');
+            
+            if (!contactInput) {
+                showErrorMessage("Contact input not found");
+                return;
+            }
+            
+            const contactInfo = contactInput.value.trim();
+            
+            // Basic validation
+            if (!contactInfo) {
+                showErrorMessage("Please enter your contact information");
+                contactInput.focus();
+                return;
+            }
+            
+            // Disable the submit button and show loading
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Sending...';
+                submitButton.classList.add('btn-loading');
+            }
+            
+            try {
+                // For development purposes, simulate a successful response
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.log("Development mode: Simulating forgot password request");
+                    
+                    // Generate a secure OTP
+                    const secureOTP = generateSecureOTP();
+                    
+                    // Store the OTP with expiration time (only for development)
+                    setOTPWithExpiration(secureOTP);
+                    
+                    console.log(`Development OTP for testing: ${secureOTP} (valid for 10 minutes)`);
+                    
+                    // Wait for 1.5 seconds to simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Show success message
+                    showSuccessMessage(`Verification code sent to ${contactInfo}`);
+                    
+                    // Show the reset password form
+                    showResetPasswordForm(contactInfo);
+                    
+                    return;
+                }
+                
+                // In production, make the actual API call
+                const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                    body: JSON.stringify({
+                        contact: contactInfo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok || data.error) {
+                    showErrorMessage(data.error || "Failed to send verification code. Please try again.");
+                } else {
+                    // Show success message
+                    showSuccessMessage(data.message || `Verification code sent to ${contactInfo}`);
+                    
+                    // Show the reset password form
+                    showResetPasswordForm(contactInfo);
+                }
+            } catch (error) {
+                console.error("Error sending verification code:", error);
+                showErrorMessage("An error occurred. Please try again.");
+            } finally {
+                // Reset the submit button
+                if (submitButton) {
+                        submitButton.disabled = false;
+                    submitButton.textContent = 'Send Verification Code';
+                        submitButton.classList.remove('btn-loading');
+                }
+            }
+        }
+
+        // Function to show the reset password form
+        function showResetPasswordForm(contactInfo) {
+            // Hide the forgot password form
+            const forgotFormContainer = document.getElementById('forgot-form-container');
+            if (forgotFormContainer) {
+                forgotFormContainer.classList.add('hidden');
+            }
+            
+            // Show the reset password form
+            const resetPasswordContainer = document.getElementById('reset-password-container');
+            if (resetPasswordContainer) {
+                resetPasswordContainer.classList.remove('hidden');
+                
+                // Set the contact info in the form
+                const resetPhoneInput = document.getElementById('reset-phone');
+                if (resetPhoneInput && contactInfo) {
+                    resetPhoneInput.value = contactInfo;
+                }
+                
+                // Setup the form submission
+                const resetForm = document.getElementById('reset-password-form');
+                if (resetForm) {
+                    resetForm.addEventListener('submit', handleResetPassword);
+                }
+                
+                // Focus on the OTP input
+                        setTimeout(() => {
+                    const otpInput = document.getElementById('reset-otp');
+                    if (otpInput) {
+                        otpInput.focus();
+                    }
+                }, 100);
+                
+                // Start the resend timer
+                startResendTimer();
+            }
+        }
+
+        // Function to handle reset password form submission
+        async function handleResetPassword(e) {
+                e.preventDefault();
+            console.log("Reset password form submitted");
+            
+            // Get form inputs
+            const contactInput = document.getElementById('reset-phone');
+            const otpInput = document.getElementById('reset-otp');
+            const passwordInput = document.getElementById('reset-password');
+            const confirmPasswordInput = document.getElementById('reset-confirm-password');
+            
+            if (!contactInput || !otpInput || !passwordInput || !confirmPasswordInput) {
+                showErrorMessage("Form inputs not found");
+                    return;
+                }
+                
+            const contactInfo = contactInput.value.trim();
+            const otp = otpInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            
+            // Basic validation
+            if (!contactInfo) {
+                showErrorMessage("Contact information is missing");
+                        return;
+                    }
+                    
+            if (!otp) {
+                showErrorMessage("Please enter the verification code");
+                otpInput.focus();
+                        return;
+                    }
+                    
+            // Enhanced OTP validation - check length
+            if (otp.length !== 6 || !/^\d+$/.test(otp)) {
+                showErrorMessage("Please enter a valid 6-digit verification code");
+                otpInput.focus();
+                return;
+            }
+            
+            if (!password) {
+                showErrorMessage("Please enter a new password");
+                passwordInput.focus();
+                return;
+            }
+            
+            // Enhanced password validation - check strength
+            if (password.length < 8) {
+                showErrorMessage("Password must be at least 8 characters long");
+                passwordInput.focus();
+                return;
+            }
+            
+            // Check for password complexity
+            const hasLetter = /[a-zA-Z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+            
+            if (!(hasLetter && hasNumber)) {
+                showErrorMessage("Password must contain both letters and numbers");
+                passwordInput.focus();
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showErrorMessage("Passwords do not match");
+                confirmPasswordInput.focus();
+                return;
+            }
+            
+            // Disable the submit button and show loading
+                const submitButton = e.target.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Resetting...';
+                submitButton.classList.add('btn-loading');
+            }
+            
+            try {
+                // For development purposes, simulate a successful response
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.log("Development mode: Simulating password reset");
+                    
+                    // Validate OTP with expiration check
+                    const validationResult = validateOTP(otp);
+                    if (!validationResult.valid) {
+                        showErrorMessage(validationResult.message);
+                        if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Reset Password';
+                    submitButton.classList.remove('btn-loading');
+                        }
+                    return;
+                }
+                
+                    // Wait for 1.5 seconds to simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Clear the development OTP after successful validation
+                    sessionStorage.removeItem('dev_otp');
+                    
+                    // Show success message
+                    showSuccessMessage("Password reset successful! You can now log in with your new password.");
+                    
+                    // Return to the login form
+                    setTimeout(() => {
+                        showLoginForm();
+                    }, 1500);
+                    
+                    return;
+                }
+                
+                // In production, make the actual API call
+                    const response = await fetch(`${API_BASE_URL}/api/reset-password`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                        contact: contactInfo,
+                        otp: otp,
+                        password: password
+                        })
+                    });
+                    
+                const data = await response.json();
+                
+                if (!response.ok || data.error) {
+                    showErrorMessage(data.error || "Failed to reset password. Please try again.");
+                } else {
+                    // Show success message
+                    showSuccessMessage(data.message || "Password reset successful! You can now log in with your new password.");
+                    
+                    // Return to the login form
+                    setTimeout(() => {
+                        showLoginForm();
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error("Error resetting password:", error);
+                showErrorMessage("An error occurred. Please try again.");
+            } finally {
+                // Reset the submit button
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Reset Password';
+                    submitButton.classList.remove('btn-loading');
+                }
+            }
+        }
+
+        // Function to resend OTP
+        async function resendOTP() {
+            const phoneInput = document.getElementById('reset-phone');
+            if (!phoneInput) {
+                showErrorMessage("Contact information is missing");
+                        return;
+                    }
+                    
+            const contactInfo = phoneInput.value.trim();
+            if (!contactInfo) {
+                showErrorMessage("Contact information is missing");
+                return;
+            }
+            
+            // Disable the resend button and show loading
+            const resendButton = document.getElementById('resend-reset-otp');
+            if (resendButton) {
+                resendButton.classList.add('disabled');
+                resendButton.textContent = 'Sending...';
+            }
+            
+            try {
+                // For development purposes, simulate a successful response
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.log("Development mode: Simulating OTP resend");
+                    
+                    // Generate a new secure OTP
+                    const secureOTP = generateSecureOTP();
+                    
+                    // Store the OTP with expiration time (only for development)
+                    setOTPWithExpiration(secureOTP);
+                    
+                    console.log(`New development OTP for testing: ${secureOTP} (valid for 10 minutes)`);
+                    
+                    // Wait for 1.5 seconds to simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Show success message
+                    showSuccessMessage(`Verification code resent to ${contactInfo}`);
+                    
+                    // Start the resend timer
+                    startResendTimer();
+                    
+                        return;
+                    }
+                    
+                // In production, make the actual API call
+                    const response = await fetch(`${API_BASE_URL}/api/forgot-password`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                    body: JSON.stringify({
+                        contact: contactInfo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok || data.error) {
+                    showErrorMessage(data.error || "Failed to resend verification code. Please try again.");
+                } else {
+                    // Show success message
+                    showSuccessMessage(data.message || `Verification code resent to ${contactInfo}`);
+                    
+                    // Start the resend timer
+                    startResendTimer();
+                }
+                } catch (error) {
+                console.error("Error resending verification code:", error);
+                showErrorMessage("An error occurred. Please try again.");
+            } finally {
+                // Reset the resend button
+                if (resendButton) {
+                    resendButton.textContent = 'Resend Code';
+                }
+            }
+        }
+        
+        // Function to start the resend timer
+        function startResendTimer() {
+            const resendButton = document.getElementById('resend-reset-otp');
+            if (!resendButton) return;
+            
+            // Disable the button
+            resendButton.classList.add('disabled');
+            
+            // Set the countdown time (60 seconds)
+            let seconds = 60;
+            resendButton.textContent = `Resend Code (${seconds}s)`;
+            
+            // Start the countdown
+            const countdownInterval = setInterval(() => {
+                seconds--;
+                
+                // Update the button text
+                resendButton.textContent = `Resend Code (${seconds}s)`;
+                
+                // If the countdown is complete, enable the button
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    resendButton.classList.remove('disabled');
+                    resendButton.textContent = 'Resend Code';
+                    }
+                }, 1000);
+            }
+            
+        // Check if token is valid
+        async function validateToken(token) {
+            // For development/demo purposes, automatically consider test tokens valid
+            if (token.includes('test_') || token.includes('dev_')) {
+                console.log("Development token detected, automatically considering it valid");
+                showSuccessMessage("You are already logged in. Redirecting to the main page...");
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    return;
+                }
+                
+            // In a real app, we would validate the token with the server
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/validate-token`, {
+                    method: 'GET',
+                        headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    console.log("Token is valid");
+                    showSuccessMessage("You are already logged in. Redirecting to the main page...");
+                            setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    console.log("Token is invalid, removing it");
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                }
+            } catch (error) {
+                console.error("Error validating token:", error);
+                // For development environments, still consider the token valid if server is down
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.log("Development environment: Considering token valid despite validation error");
+                    showSuccessMessage("Development mode: Considering you logged in. Redirecting...");
+                        setTimeout(() => {
+                        window.location.href = 'index.html';
+                        }, 1000);
+                    } else {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                }
+            }
+        }
+        
+        // Show success message
+        function showSuccessMessage(message) {
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            
+            if (!messageBox || !messageText) {
+                console.error("Message elements not found");
+                        return;
+                    }
+                    
+            messageBox.classList.remove('hidden', 'error');
+            messageBox.classList.add('success');
+            messageText.textContent = message;
+            
+            // For development purposes
+            showDevNotification('Success', message);
+            }
+            
+            // Show error message
+            function showErrorMessage(message) {
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            
+            if (!messageBox || !messageText) {
+                console.error("Message elements not found");
+                return;
+            }
+            
+            messageBox.classList.remove('hidden', 'success');
+            messageBox.classList.add('error');
+            messageText.textContent = message;
+            
+            // For development purposes
+            showDevNotification('Error', message);
+        }
+        
+        // Show developer notification (only in dev mode)
+        function showDevNotification(type, message) {
+            // Only show in development mode
+            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                return;
+            }
+            
+            console.log(`[${type}] ${message}`);
+            
+            // Create notification element if it doesn't exist
+            let notificationContainer = document.getElementById('dev-notifications');
+            if (!notificationContainer) {
+                notificationContainer = document.createElement('div');
+                notificationContainer.id = 'dev-notifications';
+                notificationContainer.style.position = 'fixed';
+                notificationContainer.style.bottom = '10px';
+                notificationContainer.style.right = '10px';
+                notificationContainer.style.zIndex = '9999';
+                notificationContainer.style.maxWidth = '300px';
+                document.body.appendChild(notificationContainer);
+            }
+            
+            // Create notification
+            const notification = document.createElement('div');
+            notification.style.backgroundColor = type === 'Error' ? '#f44336' : '#4CAF50';
+            notification.style.color = 'white';
+            notification.style.padding = '10px';
+            notification.style.marginTop = '5px';
+            notification.style.borderRadius = '4px';
+            notification.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            notification.style.fontSize = '14px';
+            notification.textContent = `[DEV] ${type}: ${message}`;
+                    
+                    // Add to container
+            notificationContainer.appendChild(notification);
+                    
+            // Remove after 5 seconds
+                        setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(() => {
+                    notificationContainer.removeChild(notification);
+                }, 500);
+                }, 5000);
+        }
+
+        // Function to setup login form
+        function setupLoginForm() {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        }
+        
+        // Function to handle login form submission
+        async function handleLogin(e) {
+            e.preventDefault();
+            console.log("Login form submitted");
+            
+            // Get form inputs
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const rememberInput = document.getElementById('remember');
+            
+            if (!emailInput || !passwordInput) {
+                showErrorMessage("Form inputs not found");
+                return;
+            }
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const rememberMe = rememberInput ? rememberInput.checked : false;
+            
+            // Basic validation
+            if (!email) {
+                showErrorMessage("Please enter your email");
+                emailInput.focus();
+                return;
+            }
+            
+            if (!password) {
+                showErrorMessage("Please enter your password");
+                passwordInput.focus();
+                return;
+            }
+            
+            // Disable the submit button and show loading
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Signing in...';
+                submitButton.classList.add('btn-loading');
+            }
+            
+            try {
+                // For development purposes, simulate a successful response
+                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    console.log("Development mode: Simulating login");
+                    
+                    // Wait for 1.5 seconds to simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Store token and user info
+                    const mockUser = {
+                        id: Math.random().toString(36).substring(2),
+                        name: email.split('@')[0],
+                        email: email
+                    };
+                    
+                    const mockToken = 'dev_token_' + Math.random().toString(36).substring(2);
+                    
+                    localStorage.setItem('user', JSON.stringify(mockUser));
+                    localStorage.setItem('token', mockToken);
+                    
+                    if (rememberMe) {
+                        localStorage.setItem('remember', 'true');
+                    } else {
+                        localStorage.removeItem('remember');
+                    }
+                    
+                    // Show success message
+                    showSuccessMessage("Login successful! Redirecting to dashboard...");
+                    
+                    // Redirect to the main page
+                setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                    
+                    return;
+                }
+                
+                // In production, make the actual API call
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok || data.error) {
+                    showErrorMessage(data.error || "Login failed. Please check your credentials and try again.");
+                } else {
+                    // Store user data and token
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('token', data.token);
+                    
+                    if (rememberMe) {
+                        localStorage.setItem('remember', 'true');
+                    } else {
+                        localStorage.removeItem('remember');
+                    }
+                    
+                    // Show success message
+                    showSuccessMessage(data.message || "Login successful! Redirecting to dashboard...");
+                    
+                    // Redirect to the main page
+                setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error("Error logging in:", error);
+                showErrorMessage("An error occurred. Please try again.");
+            } finally {
+                // Reset the submit button
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Sign In';
+                    submitButton.classList.remove('btn-loading');
+                }
+            }
+        }
+        
+        // Function to setup social login buttons
+        function setupSocialLogin() {
+            const googleBtn = document.querySelector('.google-btn');
+            const facebookBtn = document.querySelector('.facebook-btn');
+            
+            if (googleBtn) {
+                googleBtn.addEventListener('click', function() {
+                    handleSocialLogin('google');
+                });
+            }
+            
+            if (facebookBtn) {
+                facebookBtn.addEventListener('click', function() {
+                    handleSocialLogin('facebook');
+                });
+            }
+        }
+        
+        // Function to handle social login
+        async function handleSocialLogin(provider) {
+            console.log(`${provider} login clicked`);
+            
+            // Show loading state
+            const btn = provider === 'google' ? 
+                document.querySelector('.google-btn') : 
+                document.querySelector('.facebook-btn');
+            
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Connecting...`;
+                
+                // Simulate OAuth process
+                setTimeout(async () => {
+                    try {
+                        // For development purposes, simulate a successful login
+                        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            console.log(`Development mode: Simulating ${provider} login`);
+                            
+                            // Wait for 1 second to simulate API call
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            
+                            // Create mock user data
+                            const mockUser = {
+                                id: 'social_' + Math.random().toString(36).substring(2),
+                                name: provider === 'google' ? 'Google User' : 'Facebook User',
+                                email: `${provider.toLowerCase()}user@example.com`,
+                                provider: provider
+                            };
+                            
+                            const mockToken = 'social_token_' + Math.random().toString(36).substring(2);
+                            
+                            // Store user data and token
+                            localStorage.setItem('user', JSON.stringify(mockUser));
+                            localStorage.setItem('token', mockToken);
+                            
+                            // Show success message
+                            showSuccessMessage(`${provider} login successful! Redirecting to dashboard...`);
+                            
+                            // Redirect to the main page
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 1000);
+                            
+                            return;
+                        }
+                        
+                        // In production, make the actual API call or redirect to OAuth provider
+                        // This is just a placeholder for actual implementation
+                        window.location.href = `${API_BASE_URL}/api/auth/${provider.toLowerCase()}`;
+                        
+                    } catch (error) {
+                        console.error(`Error with ${provider} login:`, error);
+                        showErrorMessage(`${provider} login failed. Please try again.`);
+                        
+                        // Reset button
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        }
+                    }
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>
